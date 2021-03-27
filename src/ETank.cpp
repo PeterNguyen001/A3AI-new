@@ -28,6 +28,9 @@ ETank::ETank()
 	setAccelerationRate(0.0f);
 	setTurnRate(2.0f);
 	setStopRadius(150.0f);
+
+	setLOSDistance(250.0f);// 5 pixel per frame * 80 feet
+	setLOSColor(glm::vec4(1, 0, 0, 1));//red
 }
 
 ETank::~ETank()
@@ -39,6 +42,9 @@ void ETank::draw()
 		getTransform()->position.x, getTransform()->position.y, m_rotationAngle, 255, true);
 	Util::DrawLine(m_RWhishker.Start(), m_RWhishker.End());
 	Util::DrawLine(m_LWhishker.Start(), m_LWhishker.End());
+
+	//draw LOS
+	Util::DrawLine(getTransform()->position, getTransform()->position + getOrientation() * getLOSDistance(), getLOSColour());
 }
 
 void ETank::update()
@@ -66,11 +72,6 @@ void ETank::setMaxSpeed(const float speed)
 	m_maxSpeed = speed;
 }
 
-glm::vec2 ETank::getOrientation() const
-{
-	return m_orientation;
-}
-
 float ETank::getTurnRate() const
 {
 	return m_turnRate;
@@ -89,11 +90,6 @@ float ETank::getAccelerationRate() const
 void ETank::setAccelerationRate(const float rate)
 {
 	m_accelerationRate = rate;
-}
-
-void ETank::setOrientation(const glm::vec2 orientation)
-{
-	m_orientation = orientation;
 }
 
 void ETank::setRotation(const float angle)
@@ -169,8 +165,8 @@ void ETank::turnLeft()
 void ETank::m_Move()
 {
 		auto deltaTime = TheGame::Instance()->getDeltaTime();
-		if (move == true)
-		{
+		//if (move == true)
+		//{
 			if (seek == true)
 			{
 				if (Util::distance(this->getTransform()->position, m_destination) < 200.0f)
@@ -237,11 +233,11 @@ void ETank::m_Move()
 				getRigidBody()->velocity += getOrientation() * (deltaTime)+
 					0.05f * getRigidBody()->acceleration * (deltaTime);
 			}
-			else
-			getRigidBody()->velocity = m_targetDirection;
+			//else
+			//getRigidBody()->velocity = m_targetDirection;
 
-			getRigidBody()->velocity = Util::clamp(getRigidBody()->velocity, m_maxSpeed);
+			//getRigidBody()->velocity = Util::clamp(getRigidBody()->velocity, m_maxSpeed);
 
-			getTransform()->position += getRigidBody()->velocity;
-		}
+			//getTransform()->position += getRigidBody()->velocity;
+		//}
 }

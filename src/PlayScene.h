@@ -13,6 +13,8 @@
 #include "pTurret.h"
 #include <vector>
 
+
+#include "DecisionTree.h"
 #include "Tile.h"
 #include "TiledLevel.h"
 
@@ -34,7 +36,7 @@ public:
 
 	float GameTimer = 0;
 	float GunCD = 0;
-	float StageEndCD = 0;
+	float ButtonCD = 0;
 	int EnemiesDestroyed = 0;
 	int TotalBullets = 0;
 	int TotalEBullets = 0;
@@ -50,11 +52,11 @@ private:
 	//Tiles
 	void m_setGridEnabled(bool state) const;
 	std::vector<Tile*> m_pGrid;
-	std::vector<NavigationObject*>m_pMap;
+	std::vector<NavigationAgent*>m_pMap;
 	void m_buildGrid();
 	//Map
 	TileC* Bg;
-	TileC* m_field[12];
+	TileC* m_field[6];
 	//convenience functions
 	Tile* m_getTile(int col, int row) const;
 	Tile* m_getTile(glm::vec2 grid_position) const;
@@ -74,9 +76,13 @@ private:
 	std::vector<Bullet*>m_pBullet;
 	std::vector<Bullet*>m_pEnemyBullet;
 
-	void m_CheckShipLOS(NavigationObject* object);
+	void m_CheckShipLOS(NavigationAgent* object);
 
-	// UI Items
+	//Decision tree
+	DecisionTree* decisionTree;
+	
+	// Others
+	bool Debug = false;
 
 };
 

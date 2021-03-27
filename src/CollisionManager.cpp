@@ -2,7 +2,7 @@
 #include "Util.h"
 #include <algorithm>
 
-#include "NavigationObject.h"
+#include "NavigationAgent.h"
 
 
 int CollisionManager::squaredDistance(const glm::vec2 p1, const glm::vec2 p2)
@@ -328,12 +328,12 @@ bool CollisionManager::CircleAABBTanks(GameObject* object1, GameObject* object2)
 			const auto dot = Util::dot(attackVector, normal);
 			const auto angle = acos(dot / Util::magnitude(attackVector)) * Util::Rad2Deg;
 
-			switch (object2->getType()) {
+			switch (object1->getType()) {
 			case TARGET:
 				std::cout << "Collision with Planet!" << std::endl;
 				SoundManager::Instance().playSound("yay", 0);
 				break;
-			case SHIP:
+			case STAGE:
 			{
 				SoundManager::Instance().playSound("thunder", 0);
 				auto velocityX = object1->getRigidBody()->velocity.x;
@@ -404,8 +404,8 @@ bool CollisionManager::pointRectCheck(const glm::vec2 point, const glm::vec2 rec
 	return false;
 }
 
-bool CollisionManager::LOSCheck(glm::vec2 start_point, glm::vec2 end_point, const std::vector<NavigationObject*>& objects,
-	NavigationObject* target)
+bool CollisionManager::LOSCheck(glm::vec2 start_point, glm::vec2 end_point, const std::vector<NavigationAgent*>& objects,
+	NavigationAgent* target)
 {
 	for (auto object : objects)
 	{

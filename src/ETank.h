@@ -1,10 +1,10 @@
 #pragma once
 #ifndef __ETANK__
 #define __ETANK__
-#include "NavigationObject.h"
+#include "NavigationAgent.h"
 #include "Line.h"
 
-class ETank final : public NavigationObject
+class ETank final : public NavigationAgent
 {
 public:
 	// constructors
@@ -17,13 +17,10 @@ public:
 	void draw() override;
 	void update() override;
 	void clean() override;
-	bool moveRight = true;
 
 	// getters and setters
 	void setDestination(glm::vec2 destination);
 	void setMaxSpeed(float speed);
-	glm::vec2 getOrientation() const;
-	void setOrientation(glm::vec2 orientation);
 	float getRotation() const;
 	void setRotation(float angle);
 	float getTurnRate() const;
