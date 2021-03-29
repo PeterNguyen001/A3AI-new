@@ -1,118 +1,91 @@
-#include "eTurret.h"
+﻿#include "EnemyDebugMode.h"
 
+#include "EventManager.h"
 #include "Game.h"
 #include "Util.h"
 
-eTurret::eTurret()
+EnemyDebugMode::EnemyDebugMode(Enemy* base)
 {
-	TextureManager::Instance()->load("../Assets/sprites/Health.png", "df");
+	setWidth(base->getWidth());
+	setHeight(base->getHeight());
 
-	auto size = TextureManager::Instance()->getTextureSize("df");
-	setWidth(20);
-	setHeight(size.y/*100*/);
-
-	getTransform()->position = glm::vec2(400.0f, 300.0f);
+	getTransform()->position = base->getTransform()->position;
 	getRigidBody()->velocity = glm::vec2(0.0f, 0.0f);
 	getRigidBody()->acceleration = glm::vec2(0.0f, 0.0f);
 	getRigidBody()->isColliding = false;
-	setType(ETURRET);
+	setType(PTURRET);
 	setMaxSpeed(10.0f);
 	setOrientation(glm::vec2(0.0f, -1.0f));
 	setRotation(0.0f);
 	setAccelerationRate(0.0f);
 	setTurnRate(2.0f);
+	
+	setDetectionRadius(base->getDetectionRadius());
+	setLOSDistance(base->getLOSDistance());
+	setLOSColor(glm::vec4(1, 0, 0, 1));//red
 
-	setLOSDistance(250.0f);// 5 pixel per frame * 80 feet
-	m_LOSColor = glm::vec4(1, 0, 0, 1);//red
 	
 }
 
-eTurret::~eTurret()
+EnemyDebugMode::~EnemyDebugMode()
 = default;
 
-void eTurret::draw()
+void EnemyDebugMode::draw()
 {
-	TextureManager::Instance()->draw("hp", 
-		getTransform()->position.x, getTransform()->position.y, m_rotationAngle, 255, true);
-
-	/*Util::DrawLine(getTransform()->position, (getTransform()->position + getOrientation() * 60.0f) );*/
-
-	//draw LOS
-	//Util::DrawLine(getTransform()->position, getTransform()->position + getOrientation() * getLOSDistance(), m_LOSColor);
-
+	Util::DrawLine(getTransform()->position, getTransform()->position + getOrientation() * getLOSDistance(), getLOSColour());
+	Util::DrawCircle(getTransform()->position, getDetectionRadius(),glm::vec4(1,0,0,1));
 }
 
-void eTurret::update()
+void EnemyDebugMode::update()
 {
-	//m_Move();
+	m_Move();
 }
 
-void eTurret::clean()
+void EnemyDebugMode::clean()
 {
 }
 
-void eTurret::setDestination(const glm::vec2 destination)
+void EnemyDebugMode::setDestination(const glm::vec2 destination)
 {
 	m_destination = destination;
 }
 
-void eTurret::setMaxSpeed(const float speed)
+void EnemyDebugMode::setMaxSpeed(const float speed)
 {
 	m_maxSpeed = speed;
 }
 
-//glm::vec2 eTurret::getOrientation() const
-//{
-//	return m_orientation;
-//}
-
-float eTurret::getTurnRate() const
+float EnemyDebugMode::getTurnRate() const
 {
 	return m_turnRate;
 }
 
-void eTurret::setTurnRate(const float rate)
+void EnemyDebugMode::setTurnRate(const float rate)
 {
 	m_turnRate = rate;
 }
 
-float eTurret::getAccelerationRate() const
+float EnemyDebugMode::getAccelerationRate() const
 {
 	return m_accelerationRate;
 }
 
-void eTurret::setAccelerationRate(const float rate)
+void EnemyDebugMode::setAccelerationRate(const float rate)
 {
 	m_accelerationRate = rate;
 }
 
-//float eTurret::getLOSDistance() const
-//{
-//	return m_LOSDistance;
-//}
-//
-//bool eTurret::hasLOS() const
-//{
-//	return m_hasLOS;
-//}
-//
-//void eTurret::setLOSDistance(float distance)
-//{
-//	m_LOSDistance = distance;
-//}
-//
-//void eTurret::setHasLOS(bool state)
-//{
-//	m_hasLOS = state;
-//	m_LOSColor = (m_hasLOS) ? glm::vec4(0, 1, 0, 1) : glm::vec4(1, 0, 0, 1);
-//}
+void EnemyDebugMode::setDetectionRadius(float stopR)
+{
+	m_detectionRadius = stopR;
+}
 
-//void eTurret::setOrientation(const glm::vec2 orientation)
-//{
-//	m_orientation = orientation;
-//}
+float EnemyDebugMode::getDetectionRadius() const
+{
+	return m_detectionRadius;
+}
 
-void eTurret::setRotation(const float angle)
+void EnemyDebugMode::setRotation(const float angle)
 {
 	m_rotationAngle = angle;
 
@@ -126,18 +99,19 @@ void eTurret::setRotation(const float angle)
 	setOrientation(glm::vec2(x, y));
 }
 
-float eTurret::getRotation() const
+float EnemyDebugMode::getRotation() const
 {
 	return m_rotationAngle;
 }
 
-void eTurret::m_Move()
+void EnemyDebugMode::m_Move()
 {
+	EventManager::Instance().update();
 	auto deltaTime = TheGame::Instance()->getDeltaTime();
 
 	// direction with magnitude
 	m_targetDirection = m_destination - getTransform()->position;
-	
+
 	// normalized direction
 	m_targetDirection = Util::normalize(m_targetDirection);
 
@@ -145,7 +119,7 @@ void eTurret::m_Move()
 
 	auto turn_sensitivity = 5.0f;
 
-	if(abs(target_rotation) > turn_sensitivity)
+	if (abs(target_rotation) > turn_sensitivity)
 	{
 		if (target_rotation > 0.0f)
 		{
@@ -156,7 +130,29 @@ void eTurret::m_Move()
 			setRotation(getRotation() - getTurnRate());
 		}
 	}
-	
+
+
+
+	/*if (EventManager::Instance().isKeyDown(SDL_SCANCODE_RIGHT))
+	{
+		setTurnRate(1.5f);
+		setRotation(getRotation() + getTurnRate());
+	}
+	if (EventManager::Instance().isKeyDown(SDL_SCANCODE_LEFT))
+	{
+		setTurnRate(-1.5f);
+		setRotation(getRotation() + getTurnRate());
+	}*/
+
+
+
+
+
+
+
+
+
+
 	//getTransform()->position = m_pEnemy->getTransform()->position;
 
 	/*getRigidBody()->acceleration = getOrientation() * getAccelerationRate();*/
